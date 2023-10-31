@@ -26,7 +26,7 @@ def get_dataset(dataset_name, dataroot, imageSize, is_train=True, drop_rate=0.0,
     if dataset_name == 'cifar10':
         dataset = dset.CIFAR10(
             train=is_train,
-            root=dataroot, download=False,
+            root=dataroot, download=True,
             transform=transforms.Compose([
                 transforms.Resize(imageSize),
                 transforms.ToTensor(),
@@ -114,11 +114,12 @@ class UnNormalize(object):
         Returns:
             Tensor: Normalized image.
         """
-        for i in range(len(tensorBatch)):
-            for j in range(len(tensorBatch[i])):
-                tensorBatch[i][j].mul_(self.std[j]).add_(self.mean[j])
+        tbClone=tensorBatch.clone()
+        for i in range(len(tbClone)):
+            for j in range(len(tbClone[i])):
+                tbClone[i][j].mul_(self.std[j]).add_(self.mean[j])
             # The normalize code -> t.sub_(m).div_(s)
-        return tensorBatch
+        return tbClone
 
 
 def save_fig_losses(epoch, d_losses, g_losses, r_losses_real, r_losses_fake, kl_losses, fid_NREM, fid_REM,  dir_files):

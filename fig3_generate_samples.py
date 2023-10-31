@@ -114,8 +114,8 @@ with torch.no_grad():
     
 nrem = unorm(nrem)
 rem = unorm(rem)
-rec_image_eval1=unorm(rec_image_eval1)
-rec_image_eval2=unorm(rec_image_eval2)
+rec_image_eval1=unorm(image_eval1)
+rec_image_eval2=unorm(image_eval2)
 vutils.save_image(rec_image_eval1[:3].data, '%s/eval_rec1.png' % (dir_files), nrow=1)
 vutils.save_image(rec_image_eval2[:3].data, '%s/eval_rec2.png' % (dir_files), nrow=1)
 vutils.save_image(nrem[:3].data, '%s/eval_nrem.png' % (dir_files), nrow=1)

@@ -26,7 +26,7 @@ python fig3_generate_samples.py --dataset 'cifar10' --nz 256 --outf 'model_wnr'
 ```
 In order to compute FID score, use the full PAD model trained networks obtained above for 4 runs (ex: model_wnr, model_wnr1, etc.) and execute: 
 ```
-python fig3_compute_FID.py --dataset 'cifar10' --outf 'model_wnr' n_samples 500 --split 20
+python fig6_compute_FID.py --dataset 'cifar10' --outf 'model_wnr' n_samples 500 --split 20
 ```
 Once computed, call the following file in order to display the FID bar graph: 
 ```
@@ -38,7 +38,7 @@ python fig3_plot_FID.py
 ### Figure 4
 In order to compute linear classification accuracy, execute: 
 ```
-python linear_classif.py --dataset 'cifar10' --niterC 20  --outf 'model_wnr' --nz 256
+python fig4_linear_classif.py --dataset 'cifar10' --niterC 20  --outf 'model_wnr' --nz 256
 ```
 
 Classification accuracy can be computed at each epoch by running the following command in a batch script:
@@ -64,7 +64,7 @@ dset='cifar10'
 folder='model_wnr'
 for proba in {0..100..10}
 do
-       python linear_classif_occ.py --dataset $dset --niterC 20  --outf $folder --acc_file 'accuracies_levels.pth' --tile_size 4  --nz 256 --drop $proba
+       python fig5_linear_classif_occ.py --dataset $dset --niterC 20  --outf $folder --acc_file 'accuracies_levels.pth' --tile_size 4  --nz 256 --drop $proba
 done
 
 ```

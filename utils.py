@@ -42,7 +42,7 @@ def get_dataset(dataset_name, dataroot, imageSize, is_train=True, drop_rate=0.0,
         else:
             split = 'test'
         dataset = dset.SVHN(
-            root=dataroot, download=False,
+            root=dataroot, download=True,
             split = split,
             transform=transforms.Compose([
                 transforms.Resize(imageSize),
@@ -56,7 +56,7 @@ def get_dataset(dataset_name, dataroot, imageSize, is_train=True, drop_rate=0.0,
     elif dataset_name == 'mnist':
         dataset = dset.MNIST(
             train=is_train,
-            root=dataroot, download=False,
+            root=dataroot, download=True,
             transform=transforms.Compose([
                 transforms.Resize(imageSize),
                 transforms.ToTensor(),
@@ -69,7 +69,7 @@ def get_dataset(dataset_name, dataroot, imageSize, is_train=True, drop_rate=0.0,
     elif dataset_name == 'fashion':
         dataset = dset.FashionMNIST(
             train=is_train,
-            root=dataroot, download=False,
+            root=dataroot, download=True,
             transform=transforms.Compose([
                 transforms.Resize(imageSize),
                 transforms.ToTensor(),

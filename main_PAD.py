@@ -44,6 +44,9 @@ parser.add_argument('--lmbd', type=float, default=0.5, help='convex combination 
 parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
 parser.add_argument('--outf', default='dd', help='folder to output images and model checkpoints')
 parser.add_argument('--gpu_id', type=str, default='0', help='The ID of the specified GPU')
+parser.add_argument('--nowake', type=bool, default=False, help='No Wake')
+parser.add_argument('--nonrem', type=bool, default=False, help='No NREM')
+parser.add_argument('--norem', type=bool, default=False, help='No REM')
 
 opt, unknown = parser.parse_known_args()
 print(opt)
@@ -173,18 +176,20 @@ for epoch in range(len(d_losses), opt.niter):
         ###########################
         # NREM perturbed dreaming (N)
         ##########################
-        optimizerD.zero_grad()
-        latent_z = latent_output.detach()
-        
-        with torch.no_grad():
-            nrem_image = netG(latent_z)
-            occlusion = Occlude(drop_rate=random.random(), tile_size=random.randint(1,8))
-            occluded_nrem_image = occlusion(nrem_image, d=1)
-        latent_recons_dream, _ = netD(occluded_nrem_image)
-        rec_fake = rec_criterion(latent_recons_dream, latent_output.detach())
-        if opt.N > 0.0:
-            (opt.N * rec_fake).backward()
-        optimizerD.step()
+        rec_fake = torch.zeros(1, device=device)
+        if not opt.nonrem:
+            optimizerD.zero_grad()
+            latent_z = latent_output.detach()
+            
+            with torch.no_grad():
+                nrem_image = netG(latent_z)
+                occlusion = Occlude(drop_rate=random.random(), tile_size=random.randint(1,8))
+                occluded_nrem_image = occlusion(nrem_image, d=1)
+            latent_recons_dream, _ = netD(occluded_nrem_image)
+            rec_fake = rec_criterion(latent_recons_dream, latent_output.detach())
+            if opt.N > 0.0:
+                (opt.N * rec_fake).backward()
+            optimizerD.step()
 
      
 
@@ -192,25 +197,29 @@ for epoch in range(len(d_losses), opt.niter):
         ###########################
         # REM adversarial dreaming (R)
         ##########################
+        dis_errG = torch.zeros(1, device=device)
+        dis_errD_fake = torch.zeros(1, device=device)
+        dis_output = torch.zeros(batch_size, 1, device=device)
 
-        optimizerD.zero_grad()
-        optimizerG.zero_grad()
-        lmbd = opt.lmbd
-        noise = torch.randn(batch_size, nz, device=device)
-        if i==0:
-            latent_z = 0.5*latent_output.detach() + 0.5*noise
-        else:
-            latent_z = 0.25*latent_output.detach() + 0.25*old_latent_output + 0.5*noise
-        
-        dreamed_image_adv = netG(latent_z, reverse=True) # activate plasticity switch
-        latent_recons_dream, dis_output = netD(dreamed_image_adv)
-        dis_label[:] = fake_label_value # should be classified as fake
-        dis_errD_fake = dis_criterion(dis_output, dis_label)
-        if opt.R > 0.0: # if GAN learning occurs
-            dis_errD_fake.backward(retain_graph=True)
-            optimizerD.step()
-            optimizerG.step()
-        dis_errG = - dis_errD_fake
+        if not opt.norem:
+            optimizerD.zero_grad()
+            optimizerG.zero_grad()
+            lmbd = opt.lmbd
+            noise = torch.randn(batch_size, nz, device=device)
+            if i==0:
+                latent_z = 0.5*latent_output.detach() + 0.5*noise
+            else:
+                latent_z = 0.25*latent_output.detach() + 0.25*old_latent_output + 0.5*noise
+            
+            dreamed_image_adv = netG(latent_z, reverse=True) # activate plasticity switch
+            latent_recons_dream, dis_output = netD(dreamed_image_adv)
+            dis_label[:] = fake_label_value # should be classified as fake
+            dis_errD_fake = dis_criterion(dis_output, dis_label)
+            if opt.R > 0.0: # if GAN learning occurs
+                dis_errD_fake.backward(retain_graph=True)
+                optimizerD.step()
+                optimizerG.step()
+            dis_errG = - dis_errD_fake
 
         D_G_z1 = dis_output.cpu().mean()
 

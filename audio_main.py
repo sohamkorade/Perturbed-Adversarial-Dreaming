@@ -69,15 +69,15 @@ for dirs in [dir_files, dir_checkpoint]:
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 dataset, unorm, img_channels = get_dataset(args.dataset, args.dataroot,
                                            args.imsize)
+ngpu = int(args.ngpu)
+nz = int(args.nz)
+batch_size = 1
 dataloader = torch.utils.data.DataLoader(dataset,
-                                         batch_size=64,
+                                         batch_size=batch_size,
                                          shuffle=True,
                                          num_workers=2,
                                          drop_last=True)
 
-ngpu = int(args.ngpu)
-nz = int(args.nz)
-batch_size = 64
 
 # setup networks
 netG = Generator(ngpu, nz=nz, ngf=args.nf, img_channels=img_channels)
@@ -132,7 +132,7 @@ dis_criterion = nn.BCELoss()  # discriminator
 rec_criterion = nn.MSELoss()  # reconstruction
 
 # initialize the variables
-dis_label = torch.zeros(64, dtype=torch.float32, device=device)
+dis_label = torch.zeros(batch_size, dtype=torch.float32, device=device)
 REAL_VALUE = 1.0
 FAKE_VALUE = 0.0
 
@@ -155,6 +155,9 @@ for epoch in range(len(d_losses), args.epochs):
         # Discrimination wake
         optimizerD.zero_grad()
         optimizerG.zero_grad()
+
+        print(data.shape)
+        print(data)
         real_image, label = data
         real_image, label = real_image.to(device), label.to(device)
         latent_output, dis_output = netD(real_image)

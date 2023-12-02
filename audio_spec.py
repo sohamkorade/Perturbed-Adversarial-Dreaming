@@ -16,8 +16,15 @@ def audio_to_image(audio):
 	spec = librosa.feature.melspectrogram(y=audio, sr=16000, n_mels=128)
 	spec = librosa.power_to_db(spec, ref=np.max)
 	spec = spec.astype(np.float32)
-	spec = np.expand_dims(spec, axis=0)
+	spec = spec.reshape(-1)
 
+	# make sure size is 4096
+	if spec.size < 4096:
+		# pad with zeros
+		spec = np.pad(spec, (0, 4096 - spec.size), 'constant')
+	elif spec.size > 4096:
+		# truncate
+		spec = spec[:4096]
 	# reshape to (4, 32, 32)
 	spec = np.reshape(spec, (4, 32, 32))
 

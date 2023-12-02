@@ -8,8 +8,8 @@ import torch.nn.parallel
 import torch.optim as optim
 import torch.utils.data
 import torchvision.utils as vutils
-from utils import *
-from network import *
+from audio_utils import *
+from audio_network import *
 from inception import *
 
 parser = argparse.ArgumentParser()
@@ -39,16 +39,16 @@ parser.add_argument('--lrD',
                     help='learning rate, default=0.0002')
 parser.add_argument('--ngpu',
                     type=int,
-                    default=1,
+                    default=4,
                     help='number of GPUs to use')
 parser.add_argument('--outf',
-                    default='default',
+                    default='audio_default',
                     help='folder to output images and model checkpoints')
 parser.add_argument('--nonrem', type=bool, default=False, help='No NREM')
 parser.add_argument('--norem', type=bool, default=False, help='No REM')
 
 args = parser.parse_args()
-args.dataset = 'cifar10'
+args.dataset = 'spectrogram'
 args.dataroot = './datasets/'
 args.W = 1.0
 args.N = 1.0
@@ -60,8 +60,8 @@ args.lmbd = 0.5
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
-dir_files = './results/' + args.dataset + '/' + args.outf
-dir_checkpoint = './checkpoints/' + args.dataset + '/' + args.outf
+dir_files = './audio_results/' + args.dataset + '/' + args.outf
+dir_checkpoint = './audio_checkpoints/' + args.dataset + '/' + args.outf
 
 for dirs in [dir_files, dir_checkpoint]:
     os.makedirs(dirs, exist_ok=True)

@@ -49,7 +49,7 @@ parser.add_argument('--norem', type=bool, default=False, help='No REM')
 
 args = parser.parse_args()
 args.dataset = 'spectrogram'
-args.dataroot = './datasets/'
+args.dataroot = './sc09/'
 args.W = 1.0
 args.N = 1.0
 args.R = 1.0

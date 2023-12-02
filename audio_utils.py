@@ -27,8 +27,15 @@ class SpectrogramDataset(Dataset):
     """
     converts audio files to spectrograms and returns them as a dataset
     """
-    def __init__(self, audio_files, transform=None):
-        self.audio_files = ["test.wav"]
+    def __init__(self, dataroot, transform=None):
+        # list all files in the directory
+        import os
+        audio_files = []
+        for root, dirs, files in os.walk(dataroot):
+            for file in files:
+                if file.endswith(".wav"):
+                    audio_files.append(os.path.join(root, file))
+        self.audio_files = audio_files
         self.transform = transform
 
     def __len__(self):
